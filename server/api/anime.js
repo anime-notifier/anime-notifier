@@ -5,7 +5,7 @@ const popura = require('popura');
 const client = popura(process.env.MAL_USER, process.env.MAL_PASSWORD);
 
 exports.setAnimeList = (data, socket) => {
-  client.getAnimeList("Vija02")
+  client.getAnimeList(data.userName)
   .then(malList => {
     let animeWatching = malList.list.filter((a) => {
       return a.my_status === 1;

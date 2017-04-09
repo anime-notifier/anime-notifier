@@ -1,5 +1,7 @@
 "use strict";
 
+const anime = require('./api/anime');
+
 module.exports = (app) => {
   // Set up server
   const server = require("http").createServer(app);
@@ -12,11 +14,15 @@ module.exports = (app) => {
 
   // Websocket API
   io.on('connection', function(socket){
-    // Debug
-    socket.on('message', function (data) {
-        console.log('Message: ' + data);
+    socket.on('anime', function (data) {
+      switch(data.type){
+        case 'getList':
+          anime.setAnimeList(socket);
+          break;
+        default:
+          break;
+      }
     });
-    console.log('A user connected with id = ' + socket.id);
   });
   return server;
 };

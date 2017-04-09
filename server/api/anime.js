@@ -4,7 +4,7 @@ const popura = require('popura');
 
 const client = popura(process.env.MAL_USER, process.env.MAL_PASSWORD);
 
-exports.getAnimeList = (req, res) => {
+exports.setAnimeList = (socket) => {
   client.getAnimeList("Vija02")
   .then(malList => {
     let animeWatching = malList.list.filter((a) => {
@@ -24,8 +24,8 @@ exports.getAnimeList = (req, res) => {
       }))
     })
     Promise.all(promises).then((response) => {
-      res.json(response);
+      socket.emit('anime', {type: 'setAnimeList', animeList: response})
     });
   })
-  .catch(err => res.json({err}));
+  .catch(err => console.log(err));
 }

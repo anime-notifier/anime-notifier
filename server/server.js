@@ -4,7 +4,7 @@ const express = require('express')
 const config = require('./config')
 
 // Create the HTTP server (Express)
-let server = express();
+const server = express();
 
 // Apply the configuration
 config.applyConfiguration(server);

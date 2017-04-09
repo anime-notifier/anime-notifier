@@ -13,11 +13,11 @@ const store = new KnexSessionStore({
 
 exports.sessionConfig = session({
 	key: 'login',
-  secret: '@$dja$n6kjn412aFa',
+  secret: process.env.SESSION_SECRET,
   resave : true,
   saveUninitialized : true,
   cookie: {
-      maxAge: 3600000  // 1 Hour
+    maxAge: 3600000  // 1 Hour
   },
   store: store
 })

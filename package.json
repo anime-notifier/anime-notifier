@@ -1,0 +1,35 @@
+{
+  "name": "anime-notifier",
+  "version": "0.0.1",
+  "description": "Server for anime notifier",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon ./server/app.js",
+    "test": "mocha"
+  },
+  "keywords": [
+    "anime",
+    "nodejs"
+  ],
+  "author": "Vija02",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.17.1",
+    "connect-session-knex": "^1.3.4",
+    "dotenv": "^4.0.0",
+    "express": "^4.15.2",
+    "express-session": "^1.15.2",
+    "joi": "^10.4.1",
+    "knex": "^0.12.9",
+    "mysql": "^2.13.0",
+    "nodemon": "^1.11.0",
+    "nyaa-available": "^1.0.4",
+    "popura": "^1.2.5",
+    "socket.io": "^1.7.3",
+    "socket.io-express-session": "^0.1.3"
+  },
+  "devDependencies": {
+    "babel-eslint": "^7.2.1",
+    "eslint": "^3.19.0"
+  }
+}

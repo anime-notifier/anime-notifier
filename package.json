@@ -23,7 +23,7 @@
     "knex": "^0.12.9",
     "mysql": "^2.13.0",
     "nodemon": "^1.11.0",
-    "nyaa-available": "^1.1.0",
+    "nyaa-available": "^1.2.0",
     "popura": "^1.2.5",
     "socket.io": "^1.7.3",
     "socket.io-express-session": "^0.1.3"

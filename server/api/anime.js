@@ -40,7 +40,7 @@ exports.setAnimeList = (data, socket) => {
               // Then it is available
               socket.emit('anime', {type: 'setAnimeList', animeList: {title: animeWatching[i].title, available: true}});
             }else{ // Next episode is higher than that, calculate it
-              const nextEpisode = addDays(new Date(model[0].next_air), 7 * (animeWatching[i].episode + 1 - model[0].next_episode))
+              const nextEpisode = addDays(new Date(model[0].next_air), model[0].update_frequency * (animeWatching[i].episode + 1 - model[0].next_episode))
               // If next episode is in the future
               if(isFuture(nextEpisode)){
                 // Then it is not available
@@ -54,7 +54,7 @@ exports.setAnimeList = (data, socket) => {
           }
 
           // No schedule change
-          const nextEpisode = addDays(new Date(model[0].air_date), 7 * animeWatching[i].episode);
+          const nextEpisode = addDays(new Date(model[0].air_date), model[0].update_frequency * animeWatching[i].episode);
           // If next episode is in the future
           if(isFuture(nextEpisode)){
             // Then it is not available

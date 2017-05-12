@@ -10,65 +10,36 @@ const client = popura(process.env.MAL_USER, process.env.MAL_PASSWORD);
 exports.setAnimeList = (data, socket) => {
   // Get anime list from MAL with username
   client.getAnimeList(data.userName)
-  .then(malList => {
-    // Filter watching anime
-    let animeWatching = malList.list.filter((a) => {
-      return a.my_status === 1;
-    });
+  .then(mal => {
     // Send anime list
-    socket.emit('anime', {type: 'malAnimeList', malAnimeList: animeWatching})
-    // Map for ease of use
-    animeWatching = animeWatching.map((a) => {
-      return {title: a.series_title, episode: a.my_watched_episodes, series_status: a.series_status};
-    })
-    // Check the availability for each anime
-    for(let i=0; i<animeWatching.length; i++){
-      // If anime has finished airing
-      if(animeWatching[i].series_status === 2){
-        // Set as available
-        socket.emit('anime', {type: 'setAnimeList', animeList: {title: animeWatching[i].title, available: true}});
-        continue;
-      }
-      // TODO: Send when the anime will air
-      // Else check database
-      knex('animes').select('*').where({name: animeWatching[i].title}).then((model) => {
-        if(model.length !== 0){
-          // If anime schedule is changed
-          if(model[0].next_episode && model[0].next_air){
-            // If the next episode is lower than what is going to be out
-            if(animeWatching[i].episode + 1 < model[0].next_episode){
-              // Then it is available
-              socket.emit('anime', {type: 'setAnimeList', animeList: {title: animeWatching[i].title, available: true}});
-            }else{ // Next episode is higher than that, calculate it
-              const nextEpisode = addDays(new Date(model[0].next_air), model[0].update_frequency * (animeWatching[i].episode + 1 - model[0].next_episode))
-              // If next episode is in the future
-              if(isFuture(nextEpisode)){
-                // Then it is not available
-                socket.emit('anime', {type: 'setAnimeList', animeList: {title: animeWatching[i].title, available: false}});
-              }else{
-                // If in the past, then it is available
-                socket.emit('anime', {type: 'setAnimeList', animeList: {title: animeWatching[i].title, available: true}});
-              }
-            }
-            return;
-          }
+    socket.emit('anime', {type: 'malAnimeList', malAnimeList: mal.list})
 
-          // No schedule change
-          const nextEpisode = addDays(new Date(model[0].air_date), model[0].update_frequency * animeWatching[i].episode);
-          // If next episode is in the future
-          if(isFuture(nextEpisode)){
-            // Then it is not available
-            socket.emit('anime', {type: 'setAnimeList', animeList: {title: animeWatching[i].title, available: false}});
-          }else{
-            // If in the past, then it is available
-            socket.emit('anime', {type: 'setAnimeList', animeList: {title: animeWatching[i].title, available: true}});
-          }
-        }else{
-          // Data not found in the database
-          socket.emit('anime', {type: 'setAnimeList', animeList: {title: animeWatching[i].title, available: "error"}});
+    const finishedAnime = mal.list.filter(val => val.series_status === 2).map((val) => {
+      return {title: val.series_title, available: true};
+    })
+    socket.emit('anime', {type: 'setAnimeListBulk', animeListBulk: finishedAnime});
+
+    const notAiringAnime = mal.list.filter(val => val.series_status === 3).map((val) => {
+      return {title: val.series_title, available: false};
+    })
+    socket.emit('anime', {type: 'setAnimeListBulk', animeListBulk: notAiringAnime});
+
+    const airingAnimeTitles = mal.list.filter(val => val.series_status === 1).map((val) => {
+      return val.series_title;
+    })
+    knex('animes').select('*').whereIn('name', airingAnimeTitles).then((model) => {
+      const airingAnime = model.map((val) => {
+        // Maybe a faster way to do this?
+        const watchedEpisodeCount = mal.list.filter(a => a.series_title === val.name)[0].my_watched_episodes;
+        const nextEpisode = addDays(new Date(val.air_date), val.update_frequency * watchedEpisodeCount);
+        if(isFuture(nextEpisode)){
+          return {title: val.name, available: false};
         }
+        return {title: val.name, available: true};
       })
-    }
+      socket.emit('anime', {type: 'setAnimeListBulk', animeListBulk: airingAnime});
+      // socket.emit('anime', {type: 'setAnimeList', animeList: {title: val.name, available: "error"}});
+    })
   })
   .catch(err => console.log(err));
 }

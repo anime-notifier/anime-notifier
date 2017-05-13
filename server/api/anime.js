@@ -30,6 +30,11 @@ exports.setAnimeList = (data, socket) => {
       socket.emit('anime', {type: 'setAnimeListBulk', animeListBulk: airingAnime});
       // socket.emit('anime', {type: 'setAnimeList', animeList: {title: val.name, available: "error"}});
     })
-  })
-  .catch(err => console.log(err));
+  }).catch(err => {
+    if(err.toString() === "Error: No 'myinfo' field in list data therefore, it's an invalid list"){
+      socket.emit('anime', {type: 'malAnimeList', malAnimeList: "invalid_username"})
+    }else{
+      console.log(err);
+    }
+  });
 }

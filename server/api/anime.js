@@ -19,6 +19,7 @@ exports.setAnimeList = (data, socket) => {
       return val.series_title;
     })
     knex('animes').select('*').whereIn('name', airingAnimeTitles).then((model) => {
+      // For all anime in the database, check if available or not
       const airingAnime = model.map((val) => {
         const watchedEpisodeCount = airingAnimes.filter(a => a.series_title === val.name)[0].my_watched_episodes;
         const nextEpisode = addDays(new Date(val.air_date), val.update_frequency * watchedEpisodeCount);
@@ -28,7 +29,22 @@ exports.setAnimeList = (data, socket) => {
         return {title: val.name, available: true};
       })
       socket.emit('anime', {type: 'setAnimeListBulk', animeListBulk: airingAnime});
-      // socket.emit('anime', {type: 'setAnimeList', animeList: {title: val.name, available: "error"}});
+
+      // Detect anime that is not in the database
+      let unknownAnime = model.reduce((a, cur) => {
+        // Remove all anime that is found by database
+        const acc = a;
+        const index = acc.indexOf(cur.name);
+        if(index > -1){
+          acc.splice(index, 1);
+          return acc;
+        }
+        return acc
+      }, airingAnimeTitles)
+      unknownAnime = unknownAnime.map((animeTitle) => {
+        return {title: animeTitle, available: "unknown"}
+      })
+      socket.emit('anime', {type: 'setAnimeListBulk', animeListBulk: unknownAnime});
     })
   }).catch(err => {
     if(err.toString() === "Error: No 'myinfo' field in list data therefore, it's an invalid list"){

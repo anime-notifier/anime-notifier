@@ -6,11 +6,16 @@ const listStatusMap = {"watching": 1, "completed": 2, "on-hold": 3, "dropped": 4
 exports.processData = (userName) => {
   return new Promise((resolve, reject) => {
     nani.get(`user/${userName}/animelist`).then((alist) => {
-      const combinedList = alist.lists.completed
-      .concat(alist.lists.plan_to_watch)
-      .concat(alist.lists.dropped)
-      .concat(alist.lists.on_hold)
-      .concat(alist.lists.watching)
+      const completed = alist.lists.completed ? alist.lists.completed : [];
+      const plan_to_watch = alist.lists.plan_to_watch ? alist.lists.plan_to_watch : [];
+      const dropped = alist.lists.dropped ? alist.lists.dropped : [];
+      const on_hold = alist.lists.on_hold ? alist.lists.on_hold : [];
+      const watching = alist.lists.watching ? alist.lists.watching : [];
+      const combinedList = completed
+      .concat(plan_to_watch)
+      .concat(dropped)
+      .concat(on_hold)
+      .concat(watching)
       const list = combinedList.map((val) => {
         const animeStatus = animeStatusMap[val.anime.airing_status];
         const listStatus = listStatusMap[val.list_status];

@@ -5,7 +5,7 @@ const addDays = require('date-fns/add_days');
 const isFuture = require('date-fns/is_future')
 
 const mal = require('./provider/mal');
-// const alist = require('./provider/alist');
+const alist = require('./provider/alist');
 
 exports.setAnimeList = (data, socket) => {
   let processData;
@@ -13,9 +13,9 @@ exports.setAnimeList = (data, socket) => {
     case "mal":
       processData = mal.processData;
       break;
-    // case "alist":
-    //   processData = alist.processData;
-    //   break;
+    case "alist":
+      processData = alist.processData;
+      break;
     default:
       return;
   }
@@ -28,7 +28,9 @@ exports.setAnimeList = (data, socket) => {
     const airingAnimeTitles = airingAnimes.map((val) => {
       return val.title;
     })
-    knex('animes').select('*').whereIn('name', airingAnimeTitles).then((model) => {
+
+    knex('titles').select('animes.*', "titles.name").join("animes", "titles.anime_id", "=", "animes.id")
+    .whereIn('titles.name', airingAnimeTitles).then((model) => {
       // For all anime in the database, check if available or not
       const airingAnime = model.map((val) => {
         const watchedEpisodeCount = airingAnimes.filter(a => a.title === val.name)[0].watchCount;

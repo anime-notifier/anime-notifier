@@ -1,10 +1,20 @@
 "use strict";
 
+const user = require('./api/user');
 const anime = require('./api/anime');
 
 // Set up routes here instead of messing with code
 const routes =
 [
+  {
+    on: 'user',
+    routes: [
+      {type: 'login', func: user.login},
+      {type: 'logout', func: user.logout},
+      {type: 'checkSession', func: user.checkSession},
+      {type: 'getMyUserData', func: user.getMyUserData}
+    ]
+  },
   {
     on: 'anime',
     routes: [

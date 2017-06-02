@@ -54,8 +54,10 @@ module.exports = (app) => {
     mapRoute();
     routes.forEach((val) => {
       socket.on(val.on, (data) => {
+        // console.log(data);
         const index = val.types.indexOf(data.type);
         if(index !== -1){
+          delete data.type;
           val.functions[index](data, socket);
         }
       })

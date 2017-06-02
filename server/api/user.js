@@ -1,5 +1,6 @@
 const knex = require('../database').knex;
 const bcryptjs = require('bcryptjs');
+const Joi = require('joi');
 
 exports.checkSession = function (data, socket) {
   if(socket.handshake.session.user_id) { // Check if session is set
@@ -14,6 +15,43 @@ exports.getMyUserData = function (data, socket) {
 
   knex('users').select('*').where({id: socket.handshake.session.user_id}).then((user) => {
     socket.emit('user', {type: 'setMyUserData', myUserData: user[0]});
+  })
+};
+
+exports.register = function (data, socket) {
+  const schema = {
+    name: Joi.string().required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().min(8).required(),
+  };
+  Joi.validate(data, schema, err => {
+    if(err) {
+      socket.emit('status', {type: 'status', about: 'register', status: "error", error: 'Bad data'});
+      return;
+    }
+
+    const { name, email, password } = data;
+    knex('users').select('*').where({name: name}).then((users) => {
+      // If name not exist
+      if (users.length === 0) {
+        return knex('users').select('*').where({email: email})
+      }
+      throw new Error('The username you entered have been registered. Please use another username.')
+    }).then((users) => {
+      // If email not exist
+      if (users.length === 0) {
+        // Hash the password with random salt 10 round
+        return bcryptjs.hash(password, 10);
+      }
+      throw new Error('The email you entered have been registered. Please use another email.')
+    }).then((hashedPassword) => {
+      // Save to database
+      knex('users').insert({name, email, password: hashedPassword, salt: bcryptjs.getSalt(hashedPassword), is_active: 1})
+    }).then(() => {
+      socket.emit('status', {type: 'status', about: 'register', status: "success"});
+    }).catch((error) => {
+      socket.emit('status', {type: 'status', about: 'register', status: "error", error: error.toString()});
+    });
   })
 };
 

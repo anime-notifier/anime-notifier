@@ -46,7 +46,7 @@ exports.register = function (data, socket) {
       throw new Error('The email you entered have been registered. Please use another email.')
     }).then((hashedPassword) => {
       // Save to database
-      knex('users').insert({name, email, password: hashedPassword, salt: bcryptjs.getSalt(hashedPassword), is_active: 1})
+      return knex('users').insert({name, email, password: hashedPassword, salt: bcryptjs.getSalt(hashedPassword), is_active: 1})
     }).then(() => {
       socket.emit('status', {type: 'status', about: 'register', status: "success"});
     }).catch((error) => {

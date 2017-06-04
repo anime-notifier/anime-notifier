@@ -1,6 +1,6 @@
 {
-  "name": "anime-notifier",
-  "version": "0.0.1",
+  "name": "anitrack",
+  "version": "1.0.0",
   "description": "Server for anime notifier",
   "main": "index.js",
   "scripts": {

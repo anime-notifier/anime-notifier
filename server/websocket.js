@@ -9,9 +9,6 @@ const routes =
   {
     on: 'user',
     routes: [
-      {type: 'register', func: user.register},
-      {type: 'login', func: user.login},
-      {type: 'logout', func: user.logout},
       {type: 'checkSession', func: user.checkSession},
       {type: 'getMyUserData', func: user.getMyUserData}
     ]
